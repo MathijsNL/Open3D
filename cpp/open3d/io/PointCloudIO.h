@@ -189,7 +189,17 @@ bool ReadPointCloudFromXYZN(const std::string &filename,
                             geometry::PointCloud &pointcloud,
                             const ReadPointCloudOption &params);
 
+bool ReadPointCloudInMemoryFromXYZN(const unsigned char *buffer,
+                                    const size_t length,
+                                    geometry::PointCloud &pointcloud,
+                                    const ReadPointCloudOption &params);
+
 bool WritePointCloudToXYZN(const std::string &filename,
+                           const geometry::PointCloud &pointcloud,
+                           const WritePointCloudOption &params);
+
+bool WritePointCloudInMemoryToXYZN(unsigned char *&buffer,
+                                   size_t &length,
                            const geometry::PointCloud &pointcloud,
                            const WritePointCloudOption &params);
 
@@ -197,7 +207,17 @@ bool ReadPointCloudFromXYZRGB(const std::string &filename,
                               geometry::PointCloud &pointcloud,
                               const ReadPointCloudOption &params);
 
+bool ReadPointCloudInMemoryFromXYZRGB(const unsigned char *buffer,
+                                      const size_t length,
+                              geometry::PointCloud &pointcloud,
+                              const ReadPointCloudOption &params);
+
 bool WritePointCloudToXYZRGB(const std::string &filename,
+                             const geometry::PointCloud &pointcloud,
+                             const WritePointCloudOption &params);
+
+bool WritePointCloudInMemoryToXYZRGB(unsigned char *&buffer,
+                                     size_t &length,
                              const geometry::PointCloud &pointcloud,
                              const WritePointCloudOption &params);
 

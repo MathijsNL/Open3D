@@ -40,6 +40,8 @@ static const std::unordered_map<
                            const ReadPointCloudOption &)>>
         in_memory_to_pointcloud_read_function{
                 {"mem::xyz", ReadPointCloudInMemoryFromXYZ},
+                {"mem::xyzn", ReadPointCloudInMemoryFromXYZN},
+                {"mem::xyzrgb", ReadPointCloudInMemoryFromXYZRGB},
         };
 
 static const std::unordered_map<
@@ -64,6 +66,8 @@ static const std::unordered_map<
                            const WritePointCloudOption &)>>
         in_memory_to_pointcloud_write_function{
                 {"mem::xyz", WritePointCloudInMemoryToXYZ},
+                {"mem::xyzn", WritePointCloudInMemoryToXYZN},
+                {"mem::xyzrgb", WritePointCloudInMemoryToXYZRGB},
         };
 
 std::shared_ptr<geometry::PointCloud> CreatePointCloudFromFile(

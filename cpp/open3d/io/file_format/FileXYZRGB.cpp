@@ -6,10 +6,12 @@
 // ----------------------------------------------------------------------------
 
 #include <cstdio>
+#include <sstream>
 
 #include "open3d/io/FileFormatIO.h"
 #include "open3d/io/PointCloudIO.h"
 #include "open3d/utility/FileSystem.h"
+#include "open3d/utility/Helper.h"
 #include "open3d/utility/Logging.h"
 #include "open3d/utility/ProgressReporters.h"
 
@@ -88,6 +90,66 @@ bool WritePointCloudToXYZRGB(const std::string &filename,
                 reporter.Update(i);
             }
         }
+        reporter.Finish();
+        return true;
+    } catch (const std::exception &e) {
+        utility::LogWarning("Write XYZRGB failed with exception: {}", e.what());
+        return false;
+    }
+}
+
+bool ReadPointCloudInMemoryFromXYZRGB(const unsigned char* buffer,
+                                     size_t length,
+                                     geometry::PointCloud& pointcloud,
+                                     const ReadPointCloudOption& params) {
+    std::istringstream istream(std::string(reinterpret_cast<const char*>(buffer), length));
+    std::string line;
+    double x, y, z, r, g, b;
+    pointcloud.Clear();
+
+    while (std::getline(istream, line)) {
+        std::istringstream lstream(line);
+        if (lstream >> x >> y >> z >> r >> g >> b) {
+            pointcloud.points_.push_back(Eigen::Vector3d(x, y, z));
+            pointcloud.colors_.push_back(Eigen::Vector3d(r/255.0, g/255.0, b/255.0));
+        }
+    }
+    return true;
+}
+
+bool WritePointCloudInMemoryToXYZRGB(unsigned char *&buffer,
+                                    size_t &length,
+                                    const geometry::PointCloud &pointcloud,
+                                    const WritePointCloudOption &params) {
+    try {
+        utility::CountingProgressReporter reporter(params.update_progress);
+        reporter.SetTotal(pointcloud.points_.size());
+
+        std::string content;
+        for (size_t i = 0; i < pointcloud.points_.size(); i++) {
+            const Eigen::Vector3d &point = pointcloud.points_[i];
+            const Eigen::Vector3d &color = pointcloud.colors_[i];
+            auto rgb = utility::ColorToUint8(color);
+            std::string line = utility::FastFormatString(
+                    "%.10f %.10f %.10f %d %d %d\n",
+                    point(0), point(1), point(2),
+                    static_cast<int>(rgb(0)),
+                    static_cast<int>(rgb(1)),
+                    static_cast<int>(rgb(2)));
+            content.append(line);
+            if (i % 1000 == 0) {
+                reporter.Update(i);
+            }
+        }
+        // nothing to report...
+        if (content.length() == 0) {
+            reporter.Finish();
+            return false;
+        }
+        length = content.length();
+        buffer = new unsigned char[length];  // we do this for the caller
+        std::memcpy(buffer, content.c_str(), length);
+
         reporter.Finish();
         return true;
     } catch (const std::exception &e) {
